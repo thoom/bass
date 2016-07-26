@@ -6,7 +6,7 @@
 #
 # $ backup perform -t mysql_s3 [-c <path_to_configuration_file>]
 #
-Backup::Model.new(:mysql_s3, 'Description for mysql_s3') do
+Backup::Model.new(:mysql_s3, 'Backup MySQL DB to S3') do
   ##
   # Split [Splitter]
   #
@@ -20,17 +20,11 @@ Backup::Model.new(:mysql_s3, 'Description for mysql_s3') do
   #
   database MySQL do |db|
     # To dump all databases, set `db.name = :all` (or leave blank)
-    db.name               = "my_database_name"
-    db.username           = "my_username"
-    db.password           = "my_password"
-    db.host               = "localhost"
-    db.port               = 3306
-    db.socket             = "/tmp/mysql.sock"
-    # Note: when using `skip_tables` with the `db.name = :all` option,
-    # table names should be prefixed with a database name.
-    # e.g. ["db_name.table_to_skip", ...]
-    db.skip_tables        = ["skip", "these", "tables"]
-    db.only_tables        = ["only", "these", "tables"]
+    db.name               = ENV['MYSQL_DBNAME']   || :all
+    db.username           = ENV['MYSQL_USERNAME'] || "root"
+    db.password           = ENV['MYSQL_PASSWORD']
+    db.host               = ENV['MYSQL_HOST']     || 'mysql.host'
+    db.port               = ENV['MYSQL_PORT']     || 3306
     db.additional_options = ["--quick", "--single-transaction"]
   end
 
@@ -46,12 +40,12 @@ Backup::Model.new(:mysql_s3, 'Description for mysql_s3') do
   #  - us-west-1
   #
   store_with S3 do |s3|
-    s3.access_key_id     = "my_access_key_id"
-    s3.secret_access_key = "my_secret_access_key"
-    s3.region            = "us-east-1"
-    s3.bucket            = "bucket-name"
-    s3.path              = "/path/to/my/backups"
-    s3.keep              = 10
+    s3.access_key_id     = ENV['S3_KEY']
+    s3.secret_access_key = ENV['S3_SECRET']
+    s3.region            = ENV['S3_REGION'] || "us-east-1"
+    s3.bucket            = ENV['S3_BUCKET']
+    s3.path              = ENV['S3_PATH']   if ENV['S3_PATH']
+    s3.keep              = ENV['S3_KEEP']   || Time.now - 60 * 60 * 24 * 30
   end
 
   ##

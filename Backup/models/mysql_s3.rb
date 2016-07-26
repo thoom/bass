@@ -6,14 +6,10 @@
 #
 # $ backup perform -t mysql_s3 [-c <path_to_configuration_file>]
 #
-Backup::Model.new(:mysql_s3, 'Backup MySQL DB to S3') do
-  ##
-  # Split [Splitter]
-  #
-  # Split the backup file in to chunks of 250 megabytes
-  # if the backup file size exceeds 250 megabytes
-  #
-  split_into_chunks_of 250
+# For more information about Backup's components, see the documentation at:
+# http://backup.github.io/backup
+#
+Model.new(:mysql_s3, 'Backup MySQL DB to S3') do
 
   ##
   # MySQL [Database]
@@ -31,15 +27,8 @@ Backup::Model.new(:mysql_s3, 'Backup MySQL DB to S3') do
   ##
   # Amazon Simple Storage Service [Storage]
   #
-  # Available Regions:
-  #
-  #  - ap-northeast-1
-  #  - ap-southeast-1
-  #  - eu-west-1
-  #  - us-east-1
-  #  - us-west-1
-  #
   store_with S3 do |s3|
+    # AWS Credentials
     s3.access_key_id     = ENV['S3_KEY']
     s3.secret_access_key = ENV['S3_SECRET']
     s3.region            = ENV['S3_REGION'] || "us-east-1"
@@ -49,11 +38,15 @@ Backup::Model.new(:mysql_s3, 'Backup MySQL DB to S3') do
   end
 
   ##
+  # Bzip2 [Compressor]
+  #
+  compress_with Bzip2
+
+  ##
   # Mail [Notifier]
   #
   # The default delivery method for Mail Notifiers is 'SMTP'.
-  # See the Wiki for other delivery options.
-  # https://github.com/meskyanichi/backup/wiki/Notifiers
+  # See the documentation for other delivery options.
   #
   # notify_by Mail do |mail|
   #   mail.on_success           = true
@@ -62,6 +55,9 @@ Backup::Model.new(:mysql_s3, 'Backup MySQL DB to S3') do
   #
   #   mail.from                 = "sender@email.com"
   #   mail.to                   = "receiver@email.com"
+  #   mail.cc                   = "cc@email.com"
+  #   mail.bcc                  = "bcc@email.com"
+  #   mail.reply_to             = "reply_to@email.com"
   #   mail.address              = "smtp.gmail.com"
   #   mail.port                 = 587
   #   mail.domain               = "your.host.name"

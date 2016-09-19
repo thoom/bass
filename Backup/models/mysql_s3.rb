@@ -34,7 +34,7 @@ Model.new(:mysql_s3, 'Backup MySQL DB to S3') do
     s3.region            = ENV['S3_REGION'] || "us-east-1"
     s3.bucket            = ENV['S3_BUCKET']
     s3.path              = ENV['S3_PATH']   if ENV['S3_PATH']
-    s3.keep              = ENV['S3_KEEP']   || Time.now - 60 * 60 * 24 * 30
+    s3.keep              = ENV['S3_KEEP']   if ENV['S3_KEEP']
   end
 
   ##
